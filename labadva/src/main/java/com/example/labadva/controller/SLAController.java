@@ -11,15 +11,17 @@ import java.util.List;
 public class SLAController {
 
     private final List<SLA> slas = new ArrayList<>();
+    private long nextId = 1;
 
     @PostMapping
     public SLA createSLA(@RequestBody SLA sla) {
+        sla.setId(nextId++);
         slas.add(sla);
         return sla;
     }
 
     @GetMapping
-    public List<SLA> getAllSLAs() {
+    public List<SLA> getAllSLA() {
         return slas;
     }
 }
