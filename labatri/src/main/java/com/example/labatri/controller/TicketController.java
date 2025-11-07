@@ -1,54 +1,92 @@
 package com.example.labatri.controller;
 
-import com.example.labatri.model.Ticket;
-import com.example.labatri.model.TicketStatus;
+import com.example.labatri.model.*;
+import com.example.labatri.repository.*;
 import com.example.labatri.service.EscalationService;
-import com.example.labatri.service.TicketService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/tickets")
 public class TicketController {
 
-    private final TicketService ticketService;
+    private final TicketRepository ticketRepository;
+    private final UsersRepository usersRepository;
+    private final ExecutorRepository executorRepository;
     private final EscalationService escalationService;
 
-    public TicketController(TicketService ticketService, EscalationService escalationService) {
-        this.ticketService = ticketService;
+    public TicketController(TicketRepository ticketRepository,
+                            UsersRepository usersRepository,
+                            ExecutorRepository executorRepository,
+                            EscalationService escalationService) {
+        this.ticketRepository = ticketRepository;
+        this.usersRepository = usersRepository;
+        this.executorRepository = executorRepository;
         this.escalationService = escalationService;
     }
 
-    // ➕ Добавить новый тикет
-    @PostMapping
-    public Ticket addTicket(@RequestBody Ticket ticket) {
-        return ticketService.addTicket(ticket);
-    }
-
-    // 📋 Получить все тикеты
+    // Получить все тикеты
     @GetMapping
-    public List<Ticket> getAllTickets() {
-        return ticketService.getTickets();
+    public List<Ticket> getAll() {
+        return ticketRepository.findAll();
     }
 
-    // ⚠️ Получить только просроченные тикеты
+    // Создать новый тикет
+    @PostMapping
+    public Ticket create(@RequestBody Ticket ticket) {
+        ticket.setCreatedAt(LocalDateTime.now());
+        ticket.setStatus(TicketStatus.CREATED);
+        return ticketRepository.save(ticket);
+    }
+
+    // Бизнес-операция 1: Назначить тикет исполнителю
+    @PostMapping("/{ticketId}/assign/{executorId}")
+    public ResponseEntity<Ticket> assignExecutor(@PathVariable Long ticketId, @PathVariable Long executorId) {
+        return ticketRepository.findById(ticketId)
+                .flatMap(ticket -> executorRepository.findById(executorId)
+                        .map(exec -> {
+                            ticket.setExecutor(exec);
+                            ticket.setStatus(TicketStatus.IN_PROGRESS);
+                            ticket.setUpdatedAt(LocalDateTime.now());
+                            return ResponseEntity.ok(ticketRepository.save(ticket));
+                        }))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Бизнес-операция 2: Закрыть тикет
+    @PostMapping("/{id}/resolve")
+    public ResponseEntity<Ticket> resolve(@PathVariable Long id, @RequestBody String resolution) {
+        return ticketRepository.findById(id)
+                .map(ticket -> {
+                    ticket.setStatus(TicketStatus.RESOLVED);
+                    ticket.setResolution(resolution);
+                    ticket.setUpdatedAt(LocalDateTime.now());
+                    return ResponseEntity.ok(ticketRepository.save(ticket));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Бизнес-операция 3: Просроченные тикеты
     @GetMapping("/overdue")
-    public List<Ticket> getOverdueTickets() {
-        return ticketService.getOverdueTickets();
+    public List<Ticket> getOverdue() {
+        return escalationService.getOverdueTickets();
     }
 
-    // 🚨 Эскалировать все просроченные тикеты
-    @GetMapping("/escalate")
-    public String escalateOverdueTickets() {
+    // Бизнес-операция 4: Эскалировать тикеты
+    @PostMapping("/escalate")
+    public ResponseEntity<String> escalateAll() {
         escalationService.escalateOverdueTickets();
-        return "Просроченные тикеты успешно эскалированы!";
+        return ResponseEntity.ok("Просроченные тикеты успешно эскалированы");
     }
 
-    // 🧹 Очистить все тикеты (для удобства тестов)
-    @DeleteMapping("/clear")
-    public String clearAllTickets() {
-        ticketService.getTickets().clear();
-        return "Все тикеты удалены.";
+    // Бизнес-операция 5: Получить тикеты конкретного исполнителя
+    @GetMapping("/executor/{executorId}")
+    public List<Ticket> getTicketsByExecutor(@PathVariable Long executorId) {
+        return ticketRepository.findAll().stream()
+                .filter(t -> t.getExecutor() != null && executorId.equals(t.getExecutor().getId()))
+                .toList();
     }
 }

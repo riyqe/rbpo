@@ -1,17 +1,18 @@
 package com.example.labatri.model;
 
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
+@Table(name = "sla")
 public class SLA {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String level;        // обычный, средний, критический, блокер
-    private int responseHours;   // время на реакцию
-    private int resolveHours;    // время на решение
+    private String level;
+    private int responseHours;
+    private int resolveHours;
 }

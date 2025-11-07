@@ -1,16 +1,18 @@
 package com.example.labatri.model;
 
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
+@Table(name = "executor")
 public class Executor {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
-    private String specialization;  // например: VPN, лицензии, мониторы и т.д.
+    private String email;
+    private String department;
 }

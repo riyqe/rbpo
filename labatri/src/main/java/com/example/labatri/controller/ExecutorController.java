@@ -1,25 +1,45 @@
 package com.example.labatri.controller;
 
 import com.example.labatri.model.Executor;
+import com.example.labatri.repository.ExecutorRepository;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/executors")
 public class ExecutorController {
 
-    private final List<Executor> executors = new ArrayList<>();
+    private final ExecutorRepository executorRepository;
 
-    @PostMapping
-    public Executor createExecutor(@RequestBody Executor executor) {
-        executors.add(executor);
-        return executor;
+    public ExecutorController(ExecutorRepository executorRepository) {
+        this.executorRepository = executorRepository;
     }
 
     @GetMapping
     public List<Executor> getAllExecutors() {
-        return executors;
+        return executorRepository.findAll();
+    }
+
+    @PostMapping
+    public Executor createExecutor(@RequestBody Executor executor) {
+        return executorRepository.save(executor);
+    }
+
+    @PutMapping("/{id}")
+    public Executor updateExecutor(@PathVariable Long id, @RequestBody Executor updatedExecutor) {
+        return executorRepository.findById(id)
+                .map(executor -> {
+                    executor.setName(updatedExecutor.getName());
+                    executor.setEmail(updatedExecutor.getEmail());
+                    executor.setDepartment(updatedExecutor.getDepartment());
+                    return executorRepository.save(executor);
+                })
+                .orElseThrow(() -> new RuntimeException("Executor not found"));
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteExecutor(@PathVariable Long id) {
+        executorRepository.deleteById(id);
     }
 }

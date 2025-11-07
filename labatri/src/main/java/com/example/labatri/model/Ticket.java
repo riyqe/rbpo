@@ -1,33 +1,29 @@
 package com.example.labatri.model;
 
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
+@Table(name = "ticket")
 public class Ticket {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;               // заголовок тикета
-    private String description;         // описание проблемы
+    private String title;
+    private String description;
 
-    private TicketStatus status;        // статус (из enum ниже)
+    @Enumerated(EnumType.STRING)
+    private TicketStatus status;
 
-    private Users user;                  // кто создал
+    @Transient
+    private Executor executor;
 
-    private Executor agent;                // кто выполняет
-
-    private Category category;          // к какой категории относится
-
-    private SLA sla;                    // регламент обслуживания
-
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String resolution;
     private LocalDateTime dueDate;
-
-    private String resolution;          // описание решения (при закрытии)
 }
