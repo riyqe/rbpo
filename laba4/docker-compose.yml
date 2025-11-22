@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  db4:
+    image: postgres:16
+    container_name: laba4_postgres
+    environment:
+      POSTGRES_DB: laba4_db
+      POSTGRES_USER: laba4_user
+      POSTGRES_PASSWORD: laba4_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - laba4_postgres_data:/var/lib/postgresql/data
+
+  app4:
+    build: .
+    container_name: laba4_app
+    depends_on:
+      - db4
+    ports:
+      - "8081:8080"  # Внешний порт 8081, внутренний 8080
+    environment:
+      DB_HOST: db4
+      DB_NAME: laba4_db
+      DB_USER: laba4_user
+      DB_PASSWORD: laba4_pass
+
+volumes:
+  laba4_postgres_data:
