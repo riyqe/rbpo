@@ -1,0 +1,215 @@
+{
+  "info": {
+    "name": "labatri_test_data",
+    "_postman_id": "abc123-labatri-test",
+    "description": "Запросы для тестов",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create user Ivan Ivanov",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"username\": \"ivan.ivanov\", \"email\": \"i.ivanov@corp.com\", \"department\": \"IT Support\" }"
+            },
+            "url": "http://localhost:8080/api/users"
+          }
+        },
+        {
+          "name": "Create user Alex Petrov",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"username\": \"alex.petrov\", \"email\": \"a.petrov@corp.com\", \"department\": \"Finance\" }"
+            },
+            "url": "http://localhost:8080/api/users"
+          }
+        },
+        {
+          "name": "Create user Olga Smirnova",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"username\": \"olga.smirnova\", \"email\": \"o.smirnova@corp.com\", \"department\": \"HR\" }"
+            },
+            "url": "http://localhost:8080/api/users"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Executors",
+      "item": [
+        {
+          "name": "Create executor Dmitry Orlov",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Dmitry Orlov\", \"specialization\": \"VPN\", \"email\": \"d.orlov@corp.com\", \"department\": \"Network\" }"
+            },
+            "url": "http://localhost:8080/api/executors"
+          }
+        },
+        {
+          "name": "Create executor Svetlana Kozlova",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Svetlana Kozlova\", \"specialization\": \"Licenses\", \"email\": \"s.kozlova@corp.com\", \"department\": \"Software\" }"
+            },
+            "url": "http://localhost:8080/api/executors"
+          }
+        },
+        {
+          "name": "Create executor Ivan Grigoryev",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Ivan Grigoryev\", \"specialization\": \"Hardware\", \"email\": \"i.grigoryev@corp.com\", \"department\": \"Tech\" }"
+            },
+            "url": "http://localhost:8080/api/executors"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Create category Инциденты",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Инциденты\", \"description\": \"Неисправности оборудования или ПО\" }"
+            },
+            "url": "http://localhost:8080/api/categories"
+          }
+        },
+        {
+          "name": "Create category Лицензии и софт",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Лицензии и софт\", \"description\": \"Проблемы с активацией или установкой программ\" }"
+            },
+            "url": "http://localhost:8080/api/categories"
+          }
+        },
+        {
+          "name": "Create category Сеть и VPN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Сеть и VPN\", \"description\": \"Ошибки подключения к корпоративной сети\" }"
+            },
+            "url": "http://localhost:8080/api/categories"
+          }
+        }
+      ]
+    },
+    {
+      "name": "SLA",
+      "item": [
+        {
+          "name": "Create SLA Обычный",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"level\": \"Обычный\", \"responseHours\": 8, \"resolveHours\": 24 }"
+            },
+            "url": "http://localhost:8080/api/sla"
+          }
+        },
+        {
+          "name": "Create SLA Средний",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"level\": \"Средний\", \"responseHours\": 4, \"resolveHours\": 12 }"
+            },
+            "url": "http://localhost:8080/api/sla"
+          }
+        },
+        {
+          "name": "Create SLA Критический",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"level\": \"Критический\", \"responseHours\": 1, \"resolveHours\": 4 }"
+            },
+            "url": "http://localhost:8080/api/sla"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "Create ticket VPN не подключается",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"title\": \"VPN не подключается\", \"description\": \"Пользователь сообщает, что VPN не подключается из дома.\", \"status\": \"IN_PROGRESS\", \"executorId\": 1, \"createdAt\": \"2025-11-07T19:31:42\" }"
+            },
+            "url": "http://localhost:8080/api/tickets"
+          }
+        },
+        {
+          "name": "Create ticket Ошибка активации MS Office",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"title\": \"Ошибка активации MS Office\", \"description\": \"Не удается активировать лицензию Office 365 на новом ПК.\", \"status\": \"CREATED\", \"executorId\": 2, \"createdAt\": \"2025-11-07T19:31:42\" }"
+            },
+            "url": "http://localhost:8080/api/tickets"
+          }
+        },
+        {
+          "name": "Create ticket Не работает монитор",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"title\": \"Не работает монитор\", \"description\": \"Монитор не включается после замены блока питания.\", \"status\": \"RESOLVED\", \"executorId\": 3, \"resolution\": \"Заменен кабель питания\", \"createdAt\": \"2025-11-07T19:31:42\" }"
+            },
+            "url": "http://localhost:8080/api/tickets"
+          }
+        }
+      ]
+    }
+  ]
+}
