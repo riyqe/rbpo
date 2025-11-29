@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db6:
+    image: postgres:16
+    container_name: laba6_postgres
+    environment:
+      POSTGRES_DB: laba6_db
+      POSTGRES_USER: laba6_user
+      POSTGRES_PASSWORD: laba6_pass
+    ports:
+      - "5435:5432"
+    volumes:
+      - laba6_postgres_data:/var/lib/postgresql/data
+
+  app6:
+    build: .
+    container_name: laba6_app
+    restart: always
+    depends_on:
+      - db6
+    ports:
+      - "8443:8443"
+    environment:
+      DB_HOST: db6
+      DB_NAME: laba6_db
+      DB_USER: laba6_user
+      DB_PASSWORD: laba6_pass
+    volumes:
+      - ./src/main/resources/keystore.p12:/app/keystore.p12
+volumes:
+  laba6_postgres_data:
+
