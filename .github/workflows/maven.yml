@@ -39,5 +39,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: laba6-app-jar
-          path: target/*.jar
-        working-directory: laba6
+          path: laba6/target/*.jar
