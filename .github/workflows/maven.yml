@@ -30,7 +30,7 @@ jobs:
           SSL_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: laba6-app-jar
           path: target/*.jar
