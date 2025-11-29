@@ -2,6 +2,7 @@ package com.example.laba4.controller;
 
 import com.example.laba4.model.Users;
 import com.example.laba4.repository.UsersRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,9 +12,11 @@ import java.util.List;
 public class UserController {
 
     private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UsersRepository usersRepository) {
+    public UserController(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Получить всех пользователей
@@ -22,9 +25,18 @@ public class UserController {
         return usersRepository.findAll();
     }
 
-    // Создать нового пользователя
     @PostMapping
     public Users createUser(@RequestBody Users user) {
+        if (user.getPassword() == null || user.getPassword().length() < 8) {
+            throw new RuntimeException("Error: Пароль должен быть минимум 8 символов!");
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        if (user.getRole() == null || user.getRole().isEmpty()) {
+            user.setRole("ROLE_USER");
+        }
+
         return usersRepository.save(user);
     }
 
@@ -38,7 +50,7 @@ public class UserController {
                     user.setDepartment(updatedUser.getDepartment());
                     return usersRepository.save(user);
                 })
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Пользователь с таким id не найден: " + id));
     }
 
     // Удалить пользователя
@@ -51,6 +63,6 @@ public class UserController {
     @GetMapping("/{id}")
     public Users getUserById(@PathVariable Long id) {
         return usersRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Пользователь с таким id не найден: " + id));
     }
 }
