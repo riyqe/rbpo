@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  db5:
+    image: postgres:16
+    container_name: laba5_postgres
+    environment:
+      POSTGRES_DB: laba5_db
+      POSTGRES_USER: laba5_user
+      POSTGRES_PASSWORD: laba5_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - laba5_postgres_data:/var/lib/postgresql/data
+
+  app5:
+    build: .
+    container_name: laba5_app
+    depends_on:
+      - db5
+    ports:
+      - "8082:8080"
+    environment:
+      DB_HOST: db5
+      DB_NAME: laba5_db
+      DB_USER: laba5_user
+      DB_PASSWORD: laba5_pass
+
+volumes:
+  laba5_postgres_data:
