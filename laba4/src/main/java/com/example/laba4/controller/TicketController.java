@@ -14,18 +14,18 @@ import java.util.List;
 public class TicketController {
 
     private final TicketRepository ticketRepository;
-    private final UsersRepository usersRepository;
     private final ExecutorRepository executorRepository;
     private final EscalationService escalationService;
+    private final SLARepository slaRepository;
 
     public TicketController(TicketRepository ticketRepository,
-                            UsersRepository usersRepository,
                             ExecutorRepository executorRepository,
-                            EscalationService escalationService) {
+                            EscalationService escalationService,
+                            SLARepository slaRepository) {
         this.ticketRepository = ticketRepository;
-        this.usersRepository = usersRepository;
         this.executorRepository = executorRepository;
         this.escalationService = escalationService;
+        this.slaRepository = slaRepository;
     }
 
     // Получить все тикеты
@@ -37,9 +37,35 @@ public class TicketController {
     // Создать новый тикет
     @PostMapping
     public Ticket create(@RequestBody Ticket ticket) {
-        ticket.setCreatedAt(LocalDateTime.now());
-        ticket.setStatus(TicketStatus.CREATED);
+        if (ticket.getCreatedAt() == null) {
+            ticket.setCreatedAt(LocalDateTime.now());
+        }
+        if (ticket.getStatus() == null) {
+            ticket.setStatus(TicketStatus.CREATED);
+        }
         return ticketRepository.save(ticket);
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @RequestBody Ticket ticketDetails) {
+        return ticketRepository.findById(id)
+                .map(ticket -> {
+                    if (ticketDetails.getTitle() != null) ticket.setTitle(ticketDetails.getTitle());
+                    if (ticketDetails.getDescription() != null) ticket.setDescription(ticketDetails.getDescription());
+
+                    if (ticketDetails.getStatus() != null) ticket.setStatus(ticketDetails.getStatus());
+
+                    if (ticketDetails.getSla() != null && ticketDetails.getSla().getId() != null) {
+                        slaRepository.findById(ticketDetails.getSla().getId())
+                                .ifPresent(ticket::setSla);
+                    }
+
+                    ticket.setUpdatedAt(LocalDateTime.now());
+
+                    return ResponseEntity.ok(ticketRepository.save(ticket));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // Бизнес-операция 1: Назначить тикет исполнителю
@@ -62,7 +88,7 @@ public class TicketController {
         return ticketRepository.findById(id)
                 .map(ticket -> {
                     ticket.setStatus(TicketStatus.RESOLVED);
-                    ticket.setResolution(resolution);
+                    ticket.setResolution(resolution); // Если resolution придет как строка в body
                     ticket.setUpdatedAt(LocalDateTime.now());
                     return ResponseEntity.ok(ticketRepository.save(ticket));
                 })
@@ -82,11 +108,11 @@ public class TicketController {
         return ResponseEntity.ok("Просроченные тикеты успешно эскалированы");
     }
 
-    // Бизнес-операция 5: Получить тикеты конкретного исполнителя
-    @GetMapping("/executor/{executorId}")
-    public List<Ticket> getTicketsByExecutor(@PathVariable Long executorId) {
-        return ticketRepository.findAll().stream()
-                .filter(t -> t.getExecutor() != null && executorId.equals(t.getExecutor().getId()))
-                .toList();
+    // Получить один тикет по ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Ticket> getById(@PathVariable Long id) {
+        return ticketRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

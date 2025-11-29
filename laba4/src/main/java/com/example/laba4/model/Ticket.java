@@ -19,8 +19,13 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
 
-    @Transient
+    @ManyToOne
+    @JoinColumn(name = "executor_id")
     private Executor executor;
+
+    @ManyToOne
+    @JoinColumn(name = "sla_id")
+    private SLA sla;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
