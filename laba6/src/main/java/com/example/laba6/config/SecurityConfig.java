@@ -29,12 +29,43 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("ADMIN")
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
+                        // для всех
+                        .requestMatchers("/api/auth/**").permitAll()
 
+                        .requestMatchers(HttpMethod.POST, "/api/tickets/*/sla/*").hasRole("ADMIN")
+
+                        // админское
+                        .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("ADMIN")
+
+                        // админ может создавать категории
+                        .requestMatchers(HttpMethod.POST, "/api/categories").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/executors").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/sla").hasRole("ADMIN")
+
+                        // админ может вручную эскалировать
+                        .requestMatchers(HttpMethod.POST, "/api/tickets/escalate").hasRole("ADMIN")
+
+                        // админ видит список просроченных
+                        .requestMatchers(HttpMethod.GET, "/api/tickets/overdue").hasRole("ADMIN")
+
+                        // все авторизованные
+                        .requestMatchers(HttpMethod.GET, "/api/tickets/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/executors/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/sla/**").authenticated()
+
+                        // создание и работа с тикетами для всех авторизованных
+                        .requestMatchers(HttpMethod.POST, "/api/tickets").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/tickets/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/tickets/*/assign/*").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/tickets/*/resolve").authenticated()
+
+                        // остальное запрещено
+                        .anyRequest().denyAll()
+                )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

@@ -14,18 +14,21 @@ import java.util.List;
 public class TicketController {
 
     private final TicketRepository ticketRepository;
-    private final UsersRepository usersRepository;
     private final ExecutorRepository executorRepository;
     private final EscalationService escalationService;
+    private final SLARepository slaRepository;
+    private final CategoryRepository categoryRepository;
 
     public TicketController(TicketRepository ticketRepository,
-                            UsersRepository usersRepository,
                             ExecutorRepository executorRepository,
-                            EscalationService escalationService) {
+                            EscalationService escalationService,
+                            SLARepository slaRepository,
+                            CategoryRepository categoryRepository) {
         this.ticketRepository = ticketRepository;
-        this.usersRepository = usersRepository;
         this.executorRepository = executorRepository;
         this.escalationService = escalationService;
+        this.slaRepository = slaRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     // Получить все тикеты
@@ -34,12 +37,51 @@ public class TicketController {
         return ticketRepository.findAll();
     }
 
-    // Создать новый тикет
+    // Получить один тикет
+    @GetMapping("/{id}")
+    public ResponseEntity<Ticket> getById(@PathVariable Long id) {
+        return ticketRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public Ticket create(@RequestBody Ticket ticket) {
-        ticket.setCreatedAt(LocalDateTime.now());
-        ticket.setStatus(TicketStatus.CREATED);
+        if (ticket.getCreatedAt() == null) {
+            ticket.setCreatedAt(LocalDateTime.now());
+        }
+
+        if (ticket.getStatus() == null) {
+            ticket.setStatus(TicketStatus.CREATED);
+        }
+
+        // Привязываем SLA и Категорию, если передали их ID
+        if (ticket.getSla() != null && ticket.getSla().getId() != null) {
+            slaRepository.findById(ticket.getSla().getId()).ifPresent(ticket::setSla);
+        }
+        if (ticket.getCategory() != null && ticket.getCategory().getId() != null) {
+            categoryRepository.findById(ticket.getCategory().getId()).ifPresent(ticket::setCategory);
+        }
+
         return ticketRepository.save(ticket);
+    }
+
+    // обновление
+    @PutMapping("/{id}")
+    public ResponseEntity<Ticket> update(@PathVariable Long id, @RequestBody Ticket details) {
+        return ticketRepository.findById(id).map(ticket -> {
+            if (details.getTitle() != null) ticket.setTitle(details.getTitle());
+            if (details.getDescription() != null) ticket.setDescription(details.getDescription());
+            if (details.getStatus() != null) ticket.setStatus(details.getStatus());
+
+            // Если меняем SLA или категорию
+            if (details.getSla() != null && details.getSla().getId() != null) {
+                slaRepository.findById(details.getSla().getId()).ifPresent(ticket::setSla);
+            }
+
+            ticket.setUpdatedAt(LocalDateTime.now());
+            return ResponseEntity.ok(ticketRepository.save(ticket));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     // Бизнес-операция 1: Назначить тикет исполнителю
@@ -78,8 +120,9 @@ public class TicketController {
     // Бизнес-операция 4: Эскалировать тикеты
     @PostMapping("/escalate")
     public ResponseEntity<String> escalateAll() {
-        escalationService.escalateOverdueTickets();
-        return ResponseEntity.ok("Просроченные тикеты успешно эскалированы");
+        // Вызываем логику проверки сроков
+        int count = escalationService.escalateOverdueTickets();
+        return ResponseEntity.ok("Проверка завершена. Эскалировано тикетов: " + count);
     }
 
     // Бизнес-операция 5: Получить тикеты конкретного исполнителя

@@ -22,6 +22,14 @@ public class Ticket {
     @Transient
     private Executor executor;
 
+    @ManyToOne
+    @JoinColumn(name = "sla_id")
+    private SLA sla;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String resolution;

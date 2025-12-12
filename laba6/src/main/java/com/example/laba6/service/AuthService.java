@@ -23,7 +23,7 @@ public class AuthService {
 
     private final UsersRepository usersRepository;
     private final UserSessionRepository sessionRepository;
-    private final JwtTokenUtils jwtTokenUtils; // <--- ЗАМЕНИЛИ СЕРВИС НА UTILS
+    private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 

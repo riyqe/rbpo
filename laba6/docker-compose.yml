@@ -26,8 +26,10 @@ services:
       DB_NAME: laba6_db
       DB_USER: laba6_user
       DB_PASSWORD: laba6_pass
-    volumes:
-      - ./src/main/resources/keystore.p12:/app/keystore.p12
+      JWT_SECRET: BardakovskaiaMariaSergeevnaBKS2302BardakovskaiaMariaSergeevnaBKS2302
+      ADMIN_PASSWORD: admin12345
+      ADMIN_USERNAME: admin
+      ADMIN_EMAIL: admin@test.com
 volumes:
   laba6_postgres_data:
 
