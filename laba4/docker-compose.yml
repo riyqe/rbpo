@@ -25,6 +25,9 @@ services:
       DB_NAME: laba4_db
       DB_USER: laba4_user
       DB_PASSWORD: laba4_pass
+      ADMIN_PASSWORD: admin12345
+      ADMIN_USERNAME: admin
+      ADMIN_EMAIL: admin@test.com
 
 volumes:
   laba4_postgres_data:

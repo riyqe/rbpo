@@ -22,6 +22,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Users user) {
         try {
+            user.setRole("ROLE_USER");
             return ResponseEntity.ok(authService.register(user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

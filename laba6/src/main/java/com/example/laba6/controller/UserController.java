@@ -33,8 +33,11 @@ public class UserController {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        if (user.getRole() == null || user.getRole().isEmpty()) {
+        String role = user.getRole();
+        if (role == null || role.isEmpty()) {
             user.setRole("ROLE_USER");
+        } else if (!role.equals("ROLE_USER") && !role.equals("ROLE_ADMIN")) {
+            throw new RuntimeException("Недопустимая роль: " + role);
         }
 
         return usersRepository.save(user);
