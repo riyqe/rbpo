@@ -47,24 +47,54 @@ public class TicketController {
 
     @PostMapping
     public Ticket create(@RequestBody Ticket ticket) {
+        // базовые поля
         if (ticket.getCreatedAt() == null) {
             ticket.setCreatedAt(LocalDateTime.now());
         }
-
         if (ticket.getStatus() == null) {
             ticket.setStatus(TicketStatus.CREATED);
         }
 
-        // Привязываем SLA и Категорию, если передали их ID
-        if (ticket.getSla() != null && ticket.getSla().getId() != null) {
-            slaRepository.findById(ticket.getSla().getId()).ifPresent(ticket::setSla);
-        }
-        if (ticket.getCategory() != null && ticket.getCategory().getId() != null) {
-            categoryRepository.findById(ticket.getCategory().getId()).ifPresent(ticket::setCategory);
+        // сейвим только ID категории
+        Long categoryId = (ticket.getCategory() != null && ticket.getCategory().getId() != null)
+                ? ticket.getCategory().getId() : null;
+
+        // Очищаем связанные объекты
+        ticket.setSla(null);
+        ticket.setCategory(null);
+        ticket.setExecutor(null);
+
+        // загрузка категории из базы
+        if (categoryId != null) {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            ticket.setCategory(category);
+
+            // назнач SLA на основе категории
+            SLA sla = determineSLAbyCategory(category);
+            ticket.setSla(sla);
         }
 
         return ticketRepository.save(ticket);
     }
+
+    private SLA determineSLAbyCategory(Category category) {
+        Long categoryId = category.getId();
+
+        // по ID категории
+        if (categoryId == 1) { // Network -> Critical
+            return slaRepository.findById(1L).orElse(null);
+        } else if (categoryId == 2) { // Software -> High
+            return slaRepository.findById(2L).orElse(null);
+        } else if (categoryId == 3) { // Hardware -> Medium
+            return slaRepository.findById(3L).orElse(null);
+        } else { // остальное -> Low
+            return slaRepository.findById(4L).orElse(null);
+        }
+    }
+
+
+
 
     // обновление
     @PutMapping("/{id}")
@@ -101,14 +131,15 @@ public class TicketController {
     // Бизнес-операция 2: Закрыть тикет
     @PostMapping("/{id}/resolve")
     public ResponseEntity<Ticket> resolve(@PathVariable Long id, @RequestBody String resolution) {
-        return ticketRepository.findById(id)
-                .map(ticket -> {
-                    ticket.setStatus(TicketStatus.RESOLVED);
-                    ticket.setResolution(resolution);
-                    ticket.setUpdatedAt(LocalDateTime.now());
-                    return ResponseEntity.ok(ticketRepository.save(ticket));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        return ticketRepository.findById(id).map(ticket -> {
+            // меняем: статус и решение
+            ticket.setStatus(TicketStatus.RESOLVED);
+            ticket.setResolution(resolution);
+            ticket.setUpdatedAt(LocalDateTime.now());
+
+            // сейвим тикет. остальные поля (executor, sla, category) останутся как были.
+            return ResponseEntity.ok(ticketRepository.save(ticket));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     // Бизнес-операция 3: Просроченные тикеты
@@ -128,8 +159,6 @@ public class TicketController {
     // Бизнес-операция 5: Получить тикеты конкретного исполнителя
     @GetMapping("/executor/{executorId}")
     public List<Ticket> getTicketsByExecutor(@PathVariable Long executorId) {
-        return ticketRepository.findAll().stream()
-                .filter(t -> t.getExecutor() != null && executorId.equals(t.getExecutor().getId()))
-                .toList();
+        return ticketRepository.findByExecutorId(executorId);
     }
 }

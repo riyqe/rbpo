@@ -19,7 +19,8 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
 
-    @Transient
+    @ManyToOne
+    @JoinColumn(name = "executor_id")
     private Executor executor;
 
     @ManyToOne

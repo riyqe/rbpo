@@ -32,8 +32,6 @@ public class SecurityConfig {
                         // для всех
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/tickets/*/sla/*").hasRole("ADMIN")
-
                         // админское
                         .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("ADMIN")
@@ -50,6 +48,17 @@ public class SecurityConfig {
 
                         // админ видит список просроченных
                         .requestMatchers(HttpMethod.GET, "/api/tickets/overdue").hasRole("ADMIN")
+
+                        // админ может привязать SLA
+                        .requestMatchers(HttpMethod.POST, "/api/tickets/*/sla/*").hasRole("ADMIN")
+
+                        // обновление/удаление категорий, исполнителей, SLA
+                        .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/executors/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/executors/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/sla/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/sla/**").hasRole("ADMIN")
 
                         // все авторизованные
                         .requestMatchers(HttpMethod.GET, "/api/tickets/**").authenticated()
