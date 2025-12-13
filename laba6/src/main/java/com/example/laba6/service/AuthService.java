@@ -36,8 +36,17 @@ public class AuthService {
         if (usersRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username taken");
         }
+
+        // надёжность
+        validatePasswordStrength(user.getPassword());
+
+        // хэширование пароя
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // роль по умолчанию
         if (user.getRole() == null) user.setRole("ROLE_USER");
+
+        // сейв в бд
         Users savedUser = usersRepository.save(user);
 
         return generateTokensAndSession(savedUser);
@@ -85,5 +94,24 @@ public class AuthService {
         sessionRepository.save(session);
 
         return new AuthResponse(accessToken, refreshToken);
+    }
+
+    // надеёжность
+    private void validatePasswordStrength(String password) {
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Пароль не может быть пустым!");
+        }
+
+        if (password.length() < 8) {
+            throw new IllegalArgumentException("Пароль должен быть не менее 8 символов!");
+        }
+
+        if (!password.matches(".*\\d.*")) {
+            throw new IllegalArgumentException("Пароль должен содержать хотя бы одну цифру!");
+        }
+
+        if (!password.matches(".*[a-zA-Z].*")) {
+            throw new IllegalArgumentException("Пароль должен содержать хотя бы одну букву!");
+        }
     }
 }
